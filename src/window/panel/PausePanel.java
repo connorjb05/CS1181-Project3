@@ -3,6 +3,7 @@ package window.panel;
 import window.GameFrame;
 import window.GamePanel;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -20,7 +21,6 @@ public class PausePanel extends GamePanel {
         setLayout(new GridBagLayout());
         setOpaque(false);
 
-        // todo button options
         PauseOptionsPanel pauseOptionsPanel = new PauseOptionsPanel(frame);
 
         add(pauseOptionsPanel);
@@ -62,5 +62,9 @@ public class PausePanel extends GamePanel {
             }
         }
         return blurred;
+    }
+
+    public MainGamePanel getGamePanel(){
+        return this.gamePanel;
     }
 }

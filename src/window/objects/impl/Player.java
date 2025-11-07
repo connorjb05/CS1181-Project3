@@ -9,7 +9,7 @@ import java.awt.*;
 public class Player extends GameObject {
 
     private final double GRAVITY = 0.6;
-    private final double FRICTION = 0.6;
+    private final double FRICTION = 0.81;
 
     private double velocityX;
     private double velocityY;
@@ -65,7 +65,7 @@ public class Player extends GameObject {
             if (playerBottom > obstacleTop - tolerance && playerTop < obstacleTop && velocityY >= 0) {
 
                 setY(obstacleTop - height);
-                setVelocityX(-MainGamePanel.LEVELS_PLATFORM_SPEED / FRICTION);
+                setVelocityX(-MainGamePanel.LEVELS_PLATFORM_SPEED * FRICTION);// / FRICTION);
                 setVelocityY(0);
 
                 onGround = true;
@@ -124,6 +124,10 @@ public class Player extends GameObject {
     public void draw(Graphics graphics) {
         graphics.setColor(Color.GREEN);
         graphics.fillOval(x, y, width, height);
+    }
+
+    public boolean isOnGround(){
+        return this.onGround;
     }
 
     public void setVelocityX(double velocityX){

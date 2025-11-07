@@ -22,7 +22,7 @@ if user fails or dies screen says restart or quit game
 
 public class GameFrame extends JFrame {
 
-    private final int FPS = 60;
+    private final int FPS = 120;
     private final int FRAME_TIME = 1000 / FPS;
 
     private Timer gameTimer;

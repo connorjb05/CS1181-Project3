@@ -17,10 +17,11 @@ todo
 add random generator for adding obstacles (blocks that the user would hae to either jump over or go under) stacked and/or floating
 make screen move slowly to the left (ground that way the blocks/obstacles placed are moving to the left)
 if user goes off the left side of the screen (becuase floor is moving, they are eliminated)
+
+// todo BOMBSSSS (occasionally spawn bombs that explode and if the user is in radius it will damage them, or eleminate them if they are close enough/hit it
+// todo random times where the floor flashes red, (floor is lava type of thing briefly)
 */
 public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScreen{
-
-    private final int OBSTACLE_INTERVAL = 5; // todo make this randomized (faster based on level)
 
     private final Platform platform = new Platform(0, 0, 50);
     private final Player player = new Player(0, 0);
@@ -29,7 +30,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
 
     private int level;
     private int levelTimer;
-    public static int LEVELS_PLATFORM_SPEED = 5;
+    public static int LEVELS_PLATFORM_SPEED = 10;
     private int obstacleTimer = 0;
 
     public MainGamePanel(GameFrame frame) {
@@ -58,8 +59,8 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
             obstacle.setX(obstacle.getX() - LEVELS_PLATFORM_SPEED);
         }
 
-        if (keys[KeyEvent.VK_D]) player.moveX(3);
-        if (keys[KeyEvent.VK_A]) player.moveX(-3);
+        if (keys[KeyEvent.VK_D]) player.moveX(2.3);
+        if (keys[KeyEvent.VK_A]) player.moveX(-2.3);
 
         if (keys[KeyEvent.VK_SPACE]) player.jump();
 
@@ -76,14 +77,16 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
 
         if (player.getY() + player.getHeight() >= platform.getY()) {
             player.land(platform.getY());
-            player.moveX(-LEVELS_PLATFORM_SPEED);
+            //player.moveX(-LEVELS_PLATFORM_SPEED);
         }
+        double groundDrag = player.isOnGround() ? -LEVELS_PLATFORM_SPEED * 0.15 : 0;
+        player.moveX(groundDrag);
 
         obstacles.forEach(player::collideWithObstacle);
         obstacles.removeIf(obstacle -> obstacle.getX() + obstacle.getWidth() < 0);
 
         obstacleTimer++;
-        if (obstacleTimer >= OBSTACLE_INTERVAL) {
+        if (obstacleTimer >= 0) { // todo randomize interval based on level
             obstacleTimer = 0;
             spawnObstacles();
         }
@@ -96,20 +99,30 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
 
     private void spawnObstacles(){
 
-        int obstacleWidth = 50;
-        int obstacleHeight = 50;
-        int minY = platform.getY() - obstacleHeight;
-        int maxY = platform.getY() - 150;
+        // todo customize for loop so that there are multiple obstacles that spawn at a time based on level
+        for (int i = 0; i < 3; i++) {
 
-        int spawnX = getWidth() + 100;
-        int spawnY = minY;
+            int maxWidth = 100;
+            int minWidth = 30;
+            int maxHeight = 100;
+            int minHeight = 30;
 
-        if (Math.random() < 0.5) {
-            spawnY = maxY + (int)(Math.random() * (minY - maxY));
-        }
+            int obstacleWidth = (int) (Math.random() * (maxWidth - minWidth + 1)) + minWidth;
+            int obstacleHeight = (int) (Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+            int minY = platform.getY() - obstacleHeight;
+            int maxY = platform.getY() - getHeight();
 
-        if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 200) {
-            obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
+            int spawnX = getWidth() + obstacleWidth; // + 100
+            int spawnY = minY;
+
+
+            if (Math.random() < 0.5) {
+                spawnY = maxY + (int) (Math.random() * (minY - maxY));
+            }
+
+            if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 150) {
+                obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
+            }
         }
     }
 
