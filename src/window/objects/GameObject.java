@@ -1,10 +1,16 @@
 package window.objects;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public abstract class GameObject {
+
     protected int x, y;
     protected int width, height;
+    protected BufferedImage image = null;
 
     public GameObject(int x, int y, int width, int height){
         this.x = x;
@@ -39,6 +45,23 @@ public abstract class GameObject {
 
     public int getHeight(){
         return height;
+    }
+
+    public BufferedImage getImage(){
+        return image;
+    }
+
+    public void setImage(String path) {
+        try {
+            // credit to chatGPt
+            image = ImageIO.read(getClass().getResource(path));
+        } catch (Exception exception) {
+            try {
+                image = ImageIO.read(new File(path));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        }
     }
 
     public void setX(int x){

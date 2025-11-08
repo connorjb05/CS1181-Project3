@@ -11,7 +11,7 @@ public class Platform extends GameObject {
 
     @Override
     public void draw(Graphics graphics) {
-        graphics.setColor(Color.YELLOW);
+        graphics.setColor(new Color(0, 0, 0, 100));
         graphics.fillRect(x, y, width, height);
     }
 }

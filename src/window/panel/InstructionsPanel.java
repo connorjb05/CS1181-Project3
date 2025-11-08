@@ -1,5 +1,6 @@
 package window.panel;
 
+import audio.SoundManager;
 import window.GameFrame;
 import window.GamePanel;
 
@@ -14,47 +15,32 @@ public class InstructionsPanel extends GamePanel {
     public InstructionsPanel(GameFrame frame){
         super(frame);
 
-        JLabel title = new JLabel("Instructions", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 24));
+        setBackground(new Color(20, 20, 40));
+
+        JLabel title = new JLabel("GAME INSTRUCTIONS", SwingConstants.CENTER);
+        title.setFont(new Font("Comic Sans MS", Font.BOLD, 36));
+        title.setForeground(Color.CYAN);
         title.setAlignmentX(CENTER_ALIGNMENT);
 
-        String instructionsText = """
-                Controls:
-                A - Move Left
-                D - Move Right
-                Space - Jump/Double Jump
-                Hold Jump - Glide
-                
-                ------------------------------------------------
-                Press ENTER to Start the Game
-                ------------------------------------------------
-                """;
-
-        JTextArea instructions = new JTextArea(instructionsText);
-        instructions.setEditable(false);
-        instructions.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        instructions.setBackground(this.getBackground());
-        instructions.setLineWrap(true);
-        instructions.setWrapStyleWord(true);
-
-        JScrollPane scrollPane = new JScrollPane(instructions);
-        scrollPane.setPreferredSize(new Dimension(600, 300));
-        scrollPane.setBorder(BorderFactory.createTitledBorder("How to Play"));
-
-        add(Box.createVerticalStrut(20));
+        add(Box.createVerticalStrut(30));
         add(title);
-        add(Box.createVerticalStrut(20));
-        add(scrollPane);
+        add(Box.createVerticalStrut(40));
 
-        getInputMap(WHEN_IN_FOCUSED_WINDOW)
-                .put(KeyStroke.getKeyStroke("ENTER"), "startGame");
+        InstructionSubPanel subPanel = new InstructionSubPanel(frame);
+        add(subPanel);
+        add(Box.createVerticalStrut(30));
 
-        getActionMap().put("startGame", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setScreen(new MainGamePanel(frame));
-            }
-        });
+        VolumeControlPanel volumeControlPanel = new VolumeControlPanel(frame);
+        add(volumeControlPanel);
+        add(Box.createVerticalStrut(40));
+
+        // todo 'ENTER' to play
+
+        setupKeyBind(KeyStroke.getKeyStroke("ENTER"), "startGame", () -> startNewGame(frame));
     }
 
+    private void startNewGame(GameFrame frame) {
+        frame.setScreen(new MainGamePanel(frame));
+        SoundManager.get().restartMusic();
+    }
 }

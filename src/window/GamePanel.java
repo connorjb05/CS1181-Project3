@@ -15,11 +15,6 @@ public abstract class GamePanel extends JPanel {
         this.frame = frame;
     }
 
-    public GamePanel(GameFrame frame, LayoutManager layoutManager){
-        super(layoutManager);
-        this.frame = frame;
-    }
-
     public void setupKeyBind(String key, String name, Runnable action, boolean pressed) {
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = getActionMap();

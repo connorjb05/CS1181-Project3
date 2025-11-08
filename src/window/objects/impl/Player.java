@@ -1,10 +1,12 @@
 package window.objects.impl;
 
+import audio.SoundManager;
 import window.GameFrame;
 import window.objects.GameObject;
 import window.panel.MainGamePanel;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Player extends GameObject {
 
@@ -14,10 +16,14 @@ public class Player extends GameObject {
     private double velocityX;
     private double velocityY;
     private boolean onGround = false;
+    private boolean wasOnGround = false;
     private boolean doubleJumped = false;
+    private boolean gliding = false;
 
     public Player(int startX, int startY) {
-        super(startX, startY, 30, 30);
+        super(startX, startY, 75, 75);
+
+        setImage("src/assets/player/player_icon.jpg");
 
         x = startX;
         y = startY;
@@ -27,15 +33,13 @@ public class Player extends GameObject {
         velocityX += deltaX;
     }
 
-    public void jump(){
-        if (onGround) {
+    public void jump() {
+        if (onGround || wasOnGround) {
             velocityY = -12;
             onGround = false;
+            wasOnGround = false;
         } else if (!doubleJumped) {
-
-            velocityY = -12;
-            onGround = false;
-
+            velocityY = -18;
             doubleJumped = true;
         }
     }
@@ -44,90 +48,104 @@ public class Player extends GameObject {
         y = groundY - height;
         onGround = true;
         doubleJumped = false;
+        gliding = false;
     }
 
     public void collideWithObstacle(Obstacle obstacle){
-        if (intersects(obstacle)) {
 
-            int playerBottom = y + height;
-            int playerTop = y;
-            int playerLeft = x;
-            int playerRight = x + width;
+        if (!intersects(obstacle)) return;
 
-            int obstacleTop = obstacle.getY();
-            int obstacleBottom = obstacle.getY() + obstacle.getHeight();
-            int obstacleLeft = obstacle.getX();
-            int obstacleRight = obstacle.getX() + obstacle.getWidth();
+        // Credit to ChatGPT for the Overlap Math
+        int overlapX = Math.min(x + width - obstacle.getX(), obstacle.getX() + obstacle.getWidth() - x);
+        int overlapY = Math.min(y + height - obstacle.getY(), obstacle.getY() + obstacle.getHeight() - y);
 
-            int tolerance = 5;
+        if (overlapY < overlapX) {
 
-            // collisions for landing on top of an obstacle
-            if (playerBottom > obstacleTop - tolerance && playerTop < obstacleTop && velocityY >= 0) {
+            // vertical collisions
+            if (y < obstacle.getY()) {
 
-                setY(obstacleTop - height);
-                setVelocityX(-MainGamePanel.LEVELS_PLATFORM_SPEED * FRICTION);// / FRICTION);
-                setVelocityY(0);
-
+                y = obstacle.getY() - height;
+                velocityY = 0.0;
                 onGround = true;
                 doubleJumped = false;
-
-                return;
+                gliding = false;
+            } else {
+                y = obstacle.getY() + obstacle.getHeight();
+                velocityY = 0.5;
             }
 
-            // Collisions for hitting bottom of obstacle
-            if (playerTop <= obstacleBottom && playerBottom > obstacleBottom && velocityY < 0) {
+        } else {
 
-                setY(obstacleBottom);
-                setVelocityY(0);
-
-                return;
+            //Horizontal collisions
+            if (x < obstacle.getX()) {
+                x = obstacle.getX() - width;
+            } else {
+                x = obstacle.getX() + obstacle.getWidth();
             }
 
-            // Collisions for hitting left side of obstacle
-            if (playerRight > obstacleLeft && playerLeft < obstacleLeft) {
+            velocityX = 0.0;
 
-                setX(obstacleLeft - width);
-                setVelocityX(0);
+        }
+    }
 
-                return;
-            }
-
-            // Collisions for hitting right side of obstacle
-            if (playerLeft < obstacleRight && playerRight > obstacleRight) {
-
-                setX(obstacleRight);
-                setVelocityX(0);
-
-                return;
-            }
+    public void gameOver(){
+        if (Math.random() < 0.5) {
+            SoundManager.get().playSound("gameover", "game_over_1");
+        } else {
+            SoundManager.get().playSound("gameover", "game_over_2");
         }
     }
 
     @Override
     public void update(){
+        wasOnGround = onGround;
         onGround = false;
 
         x += (int) velocityX;
+        if (Math.abs(velocityX) <= 0.5) velocityX = 0;
         velocityX *= FRICTION;
 
-        if (Math.abs(velocityX) <= 0.5) velocityX = 0;
+        if (gliding && velocityY > 0) {
+            velocityY += GRAVITY * 0.15;
+        } else {
+            velocityY += GRAVITY;
+        }
 
-        velocityY += GRAVITY;
         y += (int) velocityY;
-
-        //if (onGround) velocityY = 0.0;
-
-        //onGround = false;
     }
 
     @Override
     public void draw(Graphics graphics) {
-        graphics.setColor(Color.GREEN);
-        graphics.fillOval(x, y, width, height);
+
+        if (image != null) {
+            graphics.drawImage(makeCircular(image), x, y, width, height, null);
+        } else {
+            graphics.setColor(Color.GREEN);
+            graphics.fillOval(x, y, width, height);
+        }
+    }
+
+    private BufferedImage makeCircular(BufferedImage source) {
+        int diameter = Math.min(source.getWidth(), source.getHeight());
+        BufferedImage mask = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2 = mask.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Create circular clipping
+        g2.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, diameter, diameter));
+        g2.drawImage(source, 0, 0, diameter, diameter, null);
+        g2.dispose();
+
+        return mask;
     }
 
     public boolean isOnGround(){
         return this.onGround;
+    }
+
+    public void setGliding(boolean gliding){
+        this.gliding = gliding;
     }
 
     public void setVelocityX(double velocityX){

@@ -1,5 +1,6 @@
 package window;
 
+import audio.SoundManager;
 import window.panel.InstructionsPanel;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ if user fails or dies screen says restart or quit game
 
 public class GameFrame extends JFrame {
 
-    private final int FPS = 120;
+    private final int FPS = 1000;
     private final int FRAME_TIME = 1000 / FPS;
 
     private Timer gameTimer;
@@ -51,10 +52,6 @@ public class GameFrame extends JFrame {
         gameTimer.start();
     }
 
-    /**
-     *
-     * @param gamePanel
-     */
     public void setScreen(GamePanel gamePanel){
 
         if (currentPanel != null) {
