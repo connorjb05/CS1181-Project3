@@ -20,7 +20,6 @@ public class SoundManager {
     private float soundEffectsVolume = 0.5f;
 
     public SoundManager(){
-
         instance = this;
 
         soundService = Executors.newCachedThreadPool();
@@ -28,14 +27,16 @@ public class SoundManager {
         startMusic();
     }
 
-    /*
-    Credit to ChatGPT
-     */
     public void playSound(String subFolder, String name){
         soundService.execute(() -> {
 
             try {
 
+                /*
+                Credit to ChatGPT
+                for the volume control
+                and file look up and clip load
+                 */
                 File file = new File("src/assets/sound/effects/" + subFolder + "/" + name + ".wav");
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
                 Clip clip = AudioSystem.getClip();

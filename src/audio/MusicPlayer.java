@@ -14,6 +14,10 @@ public class MusicPlayer implements Runnable {
     private boolean paused = false;
     private int pausedFramePosition = 0;
 
+    /**
+     * Constructor for initializing a music player instead
+     * in charge of the background music for the game
+     */
     public MusicPlayer(){
 
         String path = "src/assets/sound/music";
@@ -29,13 +33,19 @@ public class MusicPlayer implements Runnable {
         shuffleSongs();
     }
 
-
+    /**
+     * Method for shuffling the songs inside the arraylist randomly
+     */
     private void shuffleSongs(){
         Collections.shuffle(songs);
         songIterator = songs.iterator();
     }
 
-    // Credit to ChatGPT for audio code
+    /**
+     * Handles background music playback with pause, resume, stop and volume control
+     * Manages transitions between songs and automatically plays whatever is next in the track list
+     * Credit to ChatGPT for most of the audio code inside this method
+     */
     private void playNext(){
         try {
 
@@ -63,6 +73,9 @@ public class MusicPlayer implements Runnable {
         } catch (Exception ignored) {}
     }
 
+    /**
+     * Pauses whatever current track is playing and saves the frame position of the audio clip
+     */
     public void pause(){
         if (currentClip != null && currentClip.isRunning()) {
             pausedFramePosition = currentClip.getFramePosition();
@@ -71,6 +84,9 @@ public class MusicPlayer implements Runnable {
         }
     }
 
+    /**
+     * Resumes playback from the frame position of the clip that was previously paused
+     */
     public void resume(){
         if (currentClip != null && paused) {
             currentClip.setFramePosition(pausedFramePosition);
@@ -79,6 +95,9 @@ public class MusicPlayer implements Runnable {
         }
     }
 
+    /**
+     * Skips the current song and plays the next one in the track list
+     */
     public void next(){
         if (currentClip != null) {
             currentClip.stop();
@@ -87,6 +106,9 @@ public class MusicPlayer implements Runnable {
         playNext();
     }
 
+    /**
+     * Stops playback entirely and releases any audio in use
+     */
     public void stop(){
         running = false;
         if (currentClip != null) {
@@ -95,6 +117,10 @@ public class MusicPlayer implements Runnable {
         }
     }
 
+    /**
+     * Continuously manages playback in a separate thread, advancing
+     * to the next song once the current one finishes
+     */
     @Override
     public void run() {
         running = true;
@@ -106,6 +132,11 @@ public class MusicPlayer implements Runnable {
         }
     }
 
+    /**
+     * Updates playback volume for the currently active clip
+     *
+     * @param volume the selected volume level between 0.0 and 1.0
+     */
     public void updateVolume(float volume) {
         if (currentClip != null && currentClip.isOpen()) {
             try {
