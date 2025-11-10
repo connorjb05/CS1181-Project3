@@ -3,54 +3,56 @@ package window.panel;
 import audio.SoundManager;
 import window.GameFrame;
 import window.GamePanel;
-import window.objects.impl.Obstacle;
-import window.objects.impl.Platform;
-import window.objects.impl.Player;
-import window.objects.impl.SpaceShip;
+import window.objects.impl.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 
-/*
-todo
-add random generator for adding obstacles (blocks that the user would hae to either jump over or go under) stacked and/or floating
-make screen move slowly to the left (ground that way the blocks/obstacles placed are moving to the left)
-if user goes off the left side of the screen (becuase floor is moving, they are eliminated)
-
-// todo BOMBSSSS (occasionally spawn bombs that explode and if the user is in radius it will damage them, or eleminate them if they are close enough/hit it
-// todo random times where the floor flashes red, (floor is lava type of thing briefly)
-
-*/
 public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScreen{
 
-    private boolean preparing = true;
-    private int preparationCountDown = 3;
+    private boolean gameOver;
+    private boolean preparing;
+    private int preparationCountDown;
 
     private final int BACKGROUND_SPEED = 2;
-    private int backgroundX = -getWidth();
+    private int backgroundX;
     private BufferedImage background;
 
-    private final Platform platform = new Platform(0, 0, 50);
-    private final Player player = new Player(0, 0);
+    private final Platform platform;
+    private final Player player;
 
-    private final ArrayList<Obstacle> obstacles = new ArrayList<>();
-    private int obstacleTimer = 0;
+    private final ArrayList<Obstacle> obstacles;
+    private int obstacleTimer;
 
-    private final ArrayList<SpaceShip> spaceShips = new ArrayList<>();
+    private final ArrayList<FireBall> fireBalls;
+    private int fireBallTimer;
 
     private final boolean[] keys = new boolean[256];
 
-    private double score = 0;
-    private double lastMilestone = 0;
-    public static double PLATFORM_SPEED = 5;
+    private double score;
+    private double lastMilestone;
+    public static double PLATFORM_SPEED;
 
     public MainGamePanel(GameFrame frame) {
         super(frame);
+
+        gameOver = false;
+        preparing = true;
+        preparationCountDown = 3;
+        backgroundX = -getWidth();
+        platform = new Platform(0, 0, 50);
+        player = new Player(getWidth() / 2, getHeight() / 2);
+        obstacles = new ArrayList<>();
+        fireBalls = new ArrayList<>();
+        obstacleTimer = 0;
+        fireBallTimer = 0;
+        score = 0;
+        lastMilestone = 0;
+        PLATFORM_SPEED = 5;
 
         try {
             background = ImageIO.read(getClass().getResource("/assets/pngtree-game-space-interstellar-image_2408883.jpg"));
@@ -85,29 +87,84 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
     @Override
     public void update() {
 
+        if (gameOver) return;
         if (preparing) return;
 
+        updatePlatform();
         updateBackground();
         updatePlayer();
         updateObstacles();
+        updateFireBalls();
 
         if (player.getX() + player.getWidth() <= 0) {
-
-            SoundManager.get().stopMusic();
-            // todo death sound maybe a delay?
-            player.gameOver();
-            try {
-                Thread.sleep(2000);
-            } catch (Exception ignored) {}
-            SoundManager.get().restartMusic();
-
-            System.out.println("GAME OVER!");
-            frame.setScreen(new InstructionsPanel(frame));
-
+            gameOver();
             return;
         }
 
         updateScore();
+    }
+
+    private void gameOver(){
+        SoundManager.get().stopMusic();
+
+        if (Math.random() < 0.5) {
+            SoundManager.get().playSound("gameover", "game_over_1");
+        } else {
+            SoundManager.get().playSound("gameover", "game_over_2");
+        }
+
+        try {
+            Thread.sleep(1250);
+        } catch (Exception ignored) {}
+
+        SoundManager.get().restartMusic();
+
+        System.out.println("GAME OVER!");
+        frame.setScreen(new InstructionsPanel(frame));
+
+        gameOver = true;
+    }
+
+    private void updatePlatform(){
+
+        if (score >= platform.getNextPlatformEventScore() && !platform.isPlatformFlashing() && !platform.isPlatformDisappearTimerActive()) {
+            platform.setPlatformFlashing(true);
+            platform.setPlatformFlashTimer(0);
+        }
+
+        platform.update();
+
+        if (!platform.isPlatformVisible() && player.getY() <= getHeight()) {
+            gameOver();
+        }
+    }
+
+    private void updateFireBalls() {
+
+        fireBalls.forEach(FireBall::update);
+
+        fireBalls.removeIf(fireBall -> fireBall.getX() + fireBall.getWidth() < 0);
+
+        int baseSpawnDelay = 180;
+        int minSpawnDelay = 60;
+        int spawnDelay = Math.max(minSpawnDelay, baseSpawnDelay - (int) (score / 500.0) * 15);
+
+        int maxFireBalls = 3;
+
+        fireBallTimer++;
+
+        if (fireBallTimer >= spawnDelay && fireBalls.size() < maxFireBalls) {
+            fireBallTimer = 0;
+
+            int spawnY = (int) (Math.random() * (getHeight() - 150));
+            fireBalls.add(new FireBall(getWidth() + 50, spawnY, 50, 50));
+        }
+
+        for (FireBall fireBall : fireBalls) {
+            if (!player.intersects(fireBall)) continue;
+            gameOver();
+            break;
+        }
     }
 
     private void updateObstacles(){
@@ -173,36 +230,32 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         score += increment * randomFactor;
 
         if (score - lastMilestone >= 250) {
-            PLATFORM_SPEED += 1.5;
+            PLATFORM_SPEED += 1.0;
             lastMilestone = Math.floor(score / 250.0) * 250.0;
         }
     }
 
     private void spawnObstacles() {
 
-        // todo customize for loop so that there are multiple obstacles that spawn at a time based on level
-        for (int i = 0; i < 1; i++) {
+        int maxWidth = 100;
+        int minWidth = 50;
+        int maxHeight = 100;
+        int minHeight = 30;
 
-            int maxWidth = 100;
-            int minWidth = 50;
-            int maxHeight = 100;
-            int minHeight = 30;
+        int obstacleWidth = (int) (Math.random() * (maxWidth - minWidth + 1)) + minWidth;
+        int obstacleHeight = (int) (Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+        int minY = platform.getY() - obstacleHeight - ((int) (Math.random() * 100));
+        int maxY = platform.getY() - getHeight() + 100;
 
-            int obstacleWidth = (int) (Math.random() * (maxWidth - minWidth + 1)) + minWidth;
-            int obstacleHeight = (int) (Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-            int minY = platform.getY() - obstacleHeight - ((int) (Math.random() * 100));
-            int maxY = platform.getY() - getHeight() + 100;
+        int spawnX = getWidth() + obstacleWidth; // + 100
+        int spawnY = minY;
 
-            int spawnX = getWidth() + obstacleWidth; // + 100
-            int spawnY = minY;
+        if (Math.random() < 0.5) {
+            spawnY = maxY + (int) (Math.random() * (minY - maxY));
+        }
 
-            //if (Math.random() < 0.5) {
-                spawnY = maxY + (int) (Math.random() * (minY - maxY));
-            //}
-
-            if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 50) {
-                obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
-            }
+        if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 50) {
+            obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
         }
     }
 
@@ -221,6 +274,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         platform.draw(graphics);
         player.draw(graphics);
         obstacles.forEach(o -> o.draw(graphics));
+        fireBalls.forEach(f -> f.draw(graphics));
 
         paintCountDown(graphics);
     }

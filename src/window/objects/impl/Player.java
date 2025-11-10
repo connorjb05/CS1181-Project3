@@ -20,22 +20,35 @@ public class Player extends GameObject {
     private boolean doubleJumped = false;
     private boolean gliding = false;
 
+    /**
+     * Main player constructor
+     * @param startX starting horizontal position of the player
+     * @param startY starting vertical position of the player
+     */
     public Player(int startX, int startY) {
         super(startX, startY, 75, 75);
 
+        // load player icon image
         setImage("src/assets/player/player_icon.png");
 
         x = startX;
         y = startY;
     }
 
+    /**
+     * Moves the player by their x coordinate
+     * @param deltaX delta change that will be added to the players horizontal velocity
+     */
     public void moveX(double deltaX){
         velocityX += deltaX;
     }
 
+    /**
+     * Forces the player logic to jump or double jump
+     */
     public void jump() {
         if (onGround || wasOnGround) {
-            velocityY = -12;
+            velocityY = -14;
             onGround = false;
             wasOnGround = false;
         } else if (!doubleJumped) {
@@ -44,6 +57,10 @@ public class Player extends GameObject {
         }
     }
 
+    /**
+     * Forces the player logic to land
+     * @param groundY vertical pixel at which where the player landed
+     */
     public void land(int groundY){
         y = groundY - height;
         onGround = true;
@@ -51,6 +68,10 @@ public class Player extends GameObject {
         gliding = false;
     }
 
+    /**
+     * Handles collisions with the obstacles within the game
+     * @param obstacle the current obstacle the player MIGHT be colliding with
+     */
     public void collideWithObstacle(Obstacle obstacle){
 
         if (!intersects(obstacle)) return;
@@ -59,43 +80,46 @@ public class Player extends GameObject {
         int overlapX = Math.min(x + width - obstacle.getX(), obstacle.getX() + obstacle.getWidth() - x);
         int overlapY = Math.min(y + height - obstacle.getY(), obstacle.getY() + obstacle.getHeight() - y);
 
-        if (overlapY < overlapX) {
-
-            // vertical collisions
+        // Handle vertical collision only if it’s clearly stronger than horizontal
+        if (overlapY < overlapX - 2) { // small bias to favor verticals
             if (y < obstacle.getY()) {
-
+                // Land on top
                 y = obstacle.getY() - height;
-                velocityY = 0.0;
+                velocityY = 0;
                 onGround = true;
                 doubleJumped = false;
                 gliding = false;
             } else {
+                // Hit bottom
                 y = obstacle.getY() + obstacle.getHeight();
-                velocityY = 0.5;
+                velocityY = Math.max(velocityY, 0.5);
             }
-
         } else {
-
-            //Horizontal collisions
+            // Horizontal collision
             if (x < obstacle.getX()) {
+                // Player is on the left side of obstacle
                 x = obstacle.getX() - width;
+
+                // Only stop movement *into* the obstacle
+                if (velocityX > 0) velocityX = 0;
+
             } else {
+                // Player is on the right side of obstacle
                 x = obstacle.getX() + obstacle.getWidth();
+
+                // Only stop movement *into* the obstacle
+                if (velocityX < 0) velocityX = 0;
             }
 
-            velocityX = 0.0;
-
+            // Allow a tiny vertical lift so gravity can pull them out
+            y -= 1;
         }
     }
 
-    public void gameOver(){
-        if (Math.random() < 0.5) {
-            SoundManager.get().playSound("gameover", "game_over_1");
-        } else {
-            SoundManager.get().playSound("gameover", "game_over_2");
-        }
-    }
-
+    /**
+     * Player's update method, handles all players movement,
+     * runs at frame time and forces players movement logic
+     */
     @Override
     public void update(){
         wasOnGround = onGround;
@@ -114,30 +138,22 @@ public class Player extends GameObject {
         y += (int) velocityY;
     }
 
+    /**
+     * Draws the player on the screen. If an image is set, it renders the player
+     * as that image. otherwise, it draws a solid green circle
+     * as a fallback representation.
+     *
+     * @param graphics the Graphics context used for rendering the player
+     */
     @Override
     public void draw(Graphics graphics) {
 
         if (image != null) {
-            graphics.drawImage(makeCircular(image), x, y, width, height, null);
+            graphics.drawImage(image, x, y, width, height, null);
         } else {
             graphics.setColor(Color.GREEN);
             graphics.fillOval(x, y, width, height);
         }
-    }
-
-    private BufferedImage makeCircular(BufferedImage source) {
-        int diameter = Math.min(source.getWidth(), source.getHeight());
-        BufferedImage mask = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
-
-        Graphics2D g2 = mask.createGraphics();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // Create circular clipping
-        g2.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, diameter, diameter));
-        g2.drawImage(source, 0, 0, diameter, diameter, null);
-        g2.dispose();
-
-        return mask;
     }
 
     public boolean isOnGround(){
