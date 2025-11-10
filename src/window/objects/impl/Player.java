@@ -23,7 +23,7 @@ public class Player extends GameObject {
     public Player(int startX, int startY) {
         super(startX, startY, 75, 75);
 
-        setImage("src/assets/player/player_icon.jpg");
+        setImage("src/assets/player/player_icon.png");
 
         x = startX;
         y = startY;

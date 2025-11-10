@@ -8,7 +8,7 @@ public class Obstacle extends GameObject {
     public Obstacle(int x, int y, int width, int height) {
         super(x, y, width, height);
 
-        setImage("src/assets/obstacles/obstacle.jpg");
+        setImage("src/assets/obstacles/obstacle.png");
     }
 
     @Override

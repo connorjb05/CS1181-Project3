@@ -6,6 +6,7 @@ import window.GamePanel;
 import window.objects.impl.Obstacle;
 import window.objects.impl.Platform;
 import window.objects.impl.Player;
+import window.objects.impl.SpaceShip;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -40,10 +41,13 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
     private final ArrayList<Obstacle> obstacles = new ArrayList<>();
     private int obstacleTimer = 0;
 
+    private final ArrayList<SpaceShip> spaceShips = new ArrayList<>();
+
     private final boolean[] keys = new boolean[256];
 
     private double score = 0;
-    public static int PLATFORM_SPEED = 15; // 10
+    private double lastMilestone = 0;
+    public static double PLATFORM_SPEED = 5;
 
     public MainGamePanel(GameFrame frame) {
         super(frame);
@@ -93,7 +97,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
             // todo death sound maybe a delay?
             player.gameOver();
             try {
-                Thread.sleep(1500);
+                Thread.sleep(2000);
             } catch (Exception ignored) {}
             SoundManager.get().restartMusic();
 
@@ -108,7 +112,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
 
     private void updateObstacles(){
 
-        obstacles.forEach(obstacle -> obstacle.setX(obstacle.getX() - PLATFORM_SPEED));
+        obstacles.forEach(obstacle -> obstacle.setX(obstacle.getX() - (int)Math.ceil(PLATFORM_SPEED)));
 
         obstacles.forEach(player::collideWithObstacle);
         obstacles.removeIf(obstacle -> obstacle.getX() + obstacle.getWidth() < 0);
@@ -167,6 +171,11 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         final double increment = baseIncrement / (Math.log(score + 2));
 
         score += increment * randomFactor;
+
+        if (score - lastMilestone >= 250) {
+            PLATFORM_SPEED += 1.5;
+            lastMilestone = Math.floor(score / 250.0) * 250.0;
+        }
     }
 
     private void spawnObstacles() {
@@ -187,9 +196,9 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
             int spawnX = getWidth() + obstacleWidth; // + 100
             int spawnY = minY;
 
-            if (Math.random() < 0.5) {
+            //if (Math.random() < 0.5) {
                 spawnY = maxY + (int) (Math.random() * (minY - maxY));
-            }
+            //}
 
             if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 50) {
                 obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
