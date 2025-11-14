@@ -37,9 +37,15 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
     private double lastMilestone;
     public static double PLATFORM_SPEED;
 
+    /**
+     * Constructor that sets up a new game and the main ongoing game panel
+     *
+     * @param frame the main frame this panel will be displayed upon
+     */
     public MainGamePanel(GameFrame frame) {
         super(frame);
 
+        // initialize all variables for the new game
         gameOver = false;
         preparing = true;
         preparationCountDown = 3;
@@ -55,7 +61,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         PLATFORM_SPEED = 5;
 
         try {
-            background = ImageIO.read(getClass().getResource("/assets/pngtree-game-space-interstellar-image_2408883.jpg"));
+            background = ImageIO.read(getClass().getResource("/assets/image/pngtree-game-space-interstellar-image_2408883.jpg"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,8 +69,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         setFocusable(true);
         requestFocusInWindow();
 
+        // load all key binds and their actions
         setupKeyBinds();
 
+        // On a different thread initialize the player and platform
         SwingUtilities.invokeLater(() -> {
             platform.setX(0);
             platform.setY(getHeight() - 50);
@@ -75,6 +83,7 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
             player.setY(platform.getY() - player.getHeight());
         });
 
+        // Initiate game starting count down
         new Timer(750, e -> {
             preparationCountDown--;
             if (preparationCountDown <= 0) {
@@ -84,18 +93,21 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }).start();
     }
 
+    /**
+     * Game's main update loop (runs per frame change)
+     */
     @Override
     public void update() {
 
-        if (gameOver) return;
-        if (preparing) return;
+        if (gameOver) return; // don't update game if the game is over
+        if (preparing) return; // don't update game if the preparation countdown is not complete
 
-        updatePlatform();
         updateBackground();
         updatePlayer();
         updateObstacles();
         updateFireBalls();
 
+        // If the player's x coordinate leaves the screen then the game is over
         if (player.getX() + player.getWidth() <= 0) {
             gameOver();
             return;
@@ -104,6 +116,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         updateScore();
     }
 
+    /**
+     * Forces game over
+     * Displays the starting panel, then disposes of this panel in memory
+     */
     private void gameOver(){
         SoundManager.get().stopMusic();
 
@@ -125,20 +141,11 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         gameOver = true;
     }
 
-    private void updatePlatform(){
-
-        if (score >= platform.getNextPlatformEventScore() && !platform.isPlatformFlashing() && !platform.isPlatformDisappearTimerActive()) {
-            platform.setPlatformFlashing(true);
-            platform.setPlatformFlashTimer(0);
-        }
-
-        platform.update();
-
-        if (!platform.isPlatformVisible() && player.getY() <= getHeight()) {
-            gameOver();
-        }
-    }
-
+    /**
+     * Removes fireballs that are not being used (off the screen)
+     * Moves each fireball from right to left at the speed of the platform
+     * Generates and spawns more fire balls based on the players score
+     */
     private void updateFireBalls() {
 
         fireBalls.forEach(FireBall::update);
@@ -167,6 +174,11 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }
     }
 
+    /**
+     * Removes obstacles that are no longer in use (off of the screen)
+     * Moves each obstacle from right to left at the speed of the platform
+     * Generates and spawns more obstacles based on the players score
+     */
     private void updateObstacles(){
 
         obstacles.forEach(obstacle -> obstacle.setX(obstacle.getX() - (int)Math.ceil(PLATFORM_SPEED)));
@@ -181,6 +193,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }
     }
 
+    /**
+     * Update the players movement based off their input
+     * and where they are on the screen
+     */
     private void updatePlayer(){
         if (keys[KeyEvent.VK_D]) player.moveX(2.3);
         if (keys[KeyEvent.VK_A]) player.moveX(-2.3);
@@ -206,6 +222,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         player.moveX(groundDrag);
     }
 
+    /**
+     * Updates the background image of the game
+     * moves the background image continuously through a layered image
+     */
     private void updateBackground(){
         if (background == null) return;
 
@@ -221,6 +241,9 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }
     }
 
+    /**
+     * Updates the players score, score goes up slower as the game continues
+     */
     private void updateScore(){
 
         final double baseIncrement = 1.0;
@@ -235,6 +258,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }
     }
 
+    /**
+     * Randomly generates size of an obstacle and spawns it at a random height from the platform
+     * to the top of the screen
+     */
     private void spawnObstacles() {
 
         int maxWidth = 100;
@@ -254,11 +281,15 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
             spawnY = maxY + (int) (Math.random() * (minY - maxY));
         }
 
-        if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 50) {
+        if (obstacles.isEmpty() || obstacles.get(obstacles.size() - 1).getX() < getWidth() - 50) { // - 150
             obstacles.add(new Obstacle(spawnX, spawnY, obstacleWidth, obstacleHeight));
         }
     }
 
+    /**
+     *
+     * @param graphics the <code>Graphics</code> object to protect
+     */
     @Override
     protected void paintComponent(Graphics graphics){
 
@@ -279,6 +310,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         paintCountDown(graphics);
     }
 
+    /**
+     *
+     * @param graphics Graphics driver this panel is using
+     */
     private void paintCountDown(Graphics graphics){
         if (preparing && preparationCountDown > 0) {
             graphics.setFont(new Font("Comic Sans MS", Font.BOLD, 72));
@@ -289,7 +324,11 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         }
     }
 
-    // credit to ChatGPT
+    /**
+     * Paints background so that it is moving
+     * CREDIT TO CHATGPT FOR THE MOVING BACKGROUND
+     * @param graphics Graphics driver this panel is using
+     */
     private void paintBackground(Graphics graphics){
 
         if (background != null) {
@@ -313,6 +352,10 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
 
     }
 
+    /**
+     * Displays and updates the score of the player at the top of the screen
+     * @param graphics Graphics driver this panel is using
+     */
     private void paintScore(Graphics graphics){
 
         graphics.setFont(new Font("Comic Sans MS", Font.BOLD, 36));
@@ -323,33 +366,43 @@ public class MainGamePanel extends GamePanel implements GameFrame.UpdatableScree
         graphics.drawString(scoreText, getWidth() / 2 - textWidth / 2, 50);
     }
 
+    /**
+     * Sets up key input and actions for this panel
+     */
     private void setupKeyBinds() {
+
+        // basic left and right motion using 'D' and 'A'
         setupKeyBind("D", "pressRight", () -> keys[KeyEvent.VK_D] = true, true);
         setupKeyBind("D", "releaseRight", () -> keys[KeyEvent.VK_D] = false, false);
 
         setupKeyBind("A", "pressLeft", () -> keys[KeyEvent.VK_A] = true, true);
         setupKeyBind("A", "releaseLeft", () -> keys[KeyEvent.VK_A] = false, false);
 
+        // pressing space forces player to jump, if release input and action is not called then glide is set to true
         setupKeyBind(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false),
                 "pressJumpOrGlide", () -> {
                     if (!player.isOnGround()) player.setGliding(true);
                     player.jump();
                 });
 
+        // releasing space bar sets players glide to false
         setupKeyBind(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, true),
                 "releaseGlide", () -> player.setGliding(false));
 
+        // Right arrow forces the song to change to the next song in the track list
         setupKeyBind(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "nextSong", () -> {
             SoundManager.get().playNextMusic();
         });
 
-        //setupKeyBind(KeyStroke.getKeyStroke("SPACE"), "pressJump", player::jump);
-
         setupKeyBind(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "pauseGame", this::pauseGame);
     }
 
-    /*
-    Credit to ChatGPT for the blurred background
+    /**
+     * Pauses the game and displays a paused panel
+     * allowing the user to customize volume of sound effects or music
+     * and 'resume', 'restart', or 'quit' the game
+     *
+     * CREDIT TO CHATGPT FOR THE ATTEMPT OF A BLURRED BACKGROUND (I ended up liking the glitch look and kept that instead)
      */
     private void pauseGame(){
         BufferedImage snapshot = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);

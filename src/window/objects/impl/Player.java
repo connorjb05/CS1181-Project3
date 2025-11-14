@@ -1,12 +1,8 @@
 package window.objects.impl;
 
-import audio.SoundManager;
-import window.GameFrame;
 import window.objects.GameObject;
-import window.panel.MainGamePanel;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class Player extends GameObject {
 
@@ -29,7 +25,7 @@ public class Player extends GameObject {
         super(startX, startY, 75, 75);
 
         // load player icon image
-        setImage("src/assets/player/player_icon.png");
+        setImage("src/assets/image/player_icon.png");
 
         x = startX;
         y = startY;
@@ -154,6 +150,7 @@ public class Player extends GameObject {
             graphics.setColor(Color.GREEN);
             graphics.fillOval(x, y, width, height);
         }
+
     }
 
     public boolean isOnGround(){
