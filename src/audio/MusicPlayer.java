@@ -2,10 +2,18 @@ package audio;
 
 import javax.sound.sampled.*;
 import java.io.File;
-import java.net.URL;
 import java.util.*;
 
+
+// Credit to ChatGPT making this class implement runnable
 public class MusicPlayer implements Runnable {
+
+    /*
+
+    Credit to ChatGPT for most audio code
+    everything with "Clip" / currentClip was chatGPT
+
+     */
 
     private final List<File> songs;
     private Iterator<File> songIterator;

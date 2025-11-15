@@ -2,7 +2,7 @@ import audio.SoundManager;
 import window.GameFrame;
 
 /*
-Program: todo name (Project 3)
+Program: Project 3
 Author: Connor Benevich
 Date: 11/15/2025
  */

@@ -33,8 +33,6 @@ public abstract class GamePanel extends JPanel {
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = getActionMap();
 
-        
-
         int keyCode = KeyEvent.getExtendedKeyCodeForChar(key.charAt(0));
         KeyStroke keyStroke = pressed ? KeyStroke.getKeyStroke(keyCode, 0, false)  // key press
                 : KeyStroke.getKeyStroke(keyCode, 0, true);  // key release

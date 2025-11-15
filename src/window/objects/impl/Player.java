@@ -76,38 +76,38 @@ public class Player extends GameObject {
         int overlapX = Math.min(x + width - obstacle.getX(), obstacle.getX() + obstacle.getWidth() - x);
         int overlapY = Math.min(y + height - obstacle.getY(), obstacle.getY() + obstacle.getHeight() - y);
 
-        // Handle vertical collision only if it’s clearly stronger than horizontal
-        if (overlapY < overlapX - 2) { // small bias to favor verticals
+        // handle vertical collision only if its stronger than horizontal
+        if (overlapY < overlapX - 2) { // small tolerance that favors vertical collisions
             if (y < obstacle.getY()) {
-                // Land on top
+                // land on top
                 y = obstacle.getY() - height;
                 velocityY = 0;
                 onGround = true;
                 doubleJumped = false;
                 gliding = false;
             } else {
-                // Hit bottom
+                // hit bottom
                 y = obstacle.getY() + obstacle.getHeight();
                 velocityY = Math.max(velocityY, 0.5);
             }
         } else {
-            // Horizontal collision
+            // horizontal collisions
             if (x < obstacle.getX()) {
-                // Player is on the left side of obstacle
+                // player is on the left side of obstacle
                 x = obstacle.getX() - width;
 
-                // Only stop movement *into* the obstacle
+                // only stop movement into the obstacle
                 if (velocityX > 0) velocityX = 0;
 
             } else {
-                // Player is on the right side of obstacle
+                // player is on the right side of obstacle
                 x = obstacle.getX() + obstacle.getWidth();
 
-                // Only stop movement *into* the obstacle
+                // only stop movement into the obstacle
                 if (velocityX < 0) velocityX = 0;
             }
 
-            // Allow a tiny vertical lift so gravity can pull them out
+            // force a small vertical lift so gravity can pull them out
             y -= 1;
         }
     }

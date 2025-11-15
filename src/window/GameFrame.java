@@ -1,25 +1,8 @@
 package window;
 
-import audio.SoundManager;
 import window.panel.InstructionsPanel;
 
 import javax.swing.*;
-
-/*
-Game idea:
-
-Block as user:
-double jump
-glide
-
-map:
-slowly is being eaten by left side
-forcing user to speed up
-obstacles randomly generated forcing user to jump
-balls come from right or top of screen (can damage/eliminate)
-after x time of proceeding, then completion occurs, screen says go again or restart
-if user fails or dies screen says restart or quit game
-*/
 
 public class GameFrame extends JFrame {
 
@@ -29,8 +12,13 @@ public class GameFrame extends JFrame {
     private Timer gameTimer;
     private GamePanel currentPanel = null;
 
+    /**
+     * Creates the main game window
+     * Initializes the JFrame settings and loads the initial screen
+     * starts the game timer responsible for updating and repainting the active panel
+     */
     public GameFrame(){
-        super("Pixel Runner");
+        super("Project3");
         setSize(700, 500);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -41,6 +29,8 @@ public class GameFrame extends JFrame {
          */
         setScreen(new InstructionsPanel(this));
 
+        // Creates a game loop using a swing timer.
+        // Every frame, the active panel is updated (if updatable) then repainted.
         gameTimer = new Timer(FRAME_TIME, e -> {
 
             if (currentPanel instanceof UpdatableScreen screen) {
@@ -52,6 +42,12 @@ public class GameFrame extends JFrame {
         gameTimer.start();
     }
 
+    /**
+     * Changes the active screen shown in the game window.
+     * This method removes the previous panel, adds the new one,
+     * and forces a layout refresh.
+     * @param gamePanel
+     */
     public void setScreen(GamePanel gamePanel){
 
         if (currentPanel != null) {
@@ -64,8 +60,9 @@ public class GameFrame extends JFrame {
         repaint();
     }
 
-
-
+    /**
+     * Updatable screen interface for screens that require animations
+     */
     public interface UpdatableScreen {
         void update();
     }

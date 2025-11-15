@@ -12,6 +12,11 @@ import java.awt.event.KeyEvent;
 
 public class InstructionsPanel extends GamePanel {
 
+    /**
+     * Creates the instructions screen displayed before the game begins.
+     * Also basically the main menu of the game
+     * @param frame current game frame being used
+     */
     public InstructionsPanel(GameFrame frame){
         super(frame);
 
@@ -39,6 +44,10 @@ public class InstructionsPanel extends GamePanel {
         setupKeyBind(KeyStroke.getKeyStroke("ENTER"), "startGame", () -> startNewGame(frame));
     }
 
+    /**
+     * Starts a new game by switching the screen to the MainGamePanel.
+     * @param frame current game frame
+     */
     private void startNewGame(GameFrame frame) {
         frame.setScreen(new MainGamePanel(frame));
         SoundManager.get().restartMusic();

@@ -12,6 +12,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class PauseOptionsPanel extends GamePanel {
+
+    /**
+     * Constructs the pause options panel, which appears when the user pauses the game.
+     * This panel provides buttons for resuming, restarting, quitting, and adjusting volume.
+     * @param frame the main game frame used to switch screens
+     */
     public PauseOptionsPanel(GameFrame frame) {
         super(frame);
 
@@ -29,7 +35,7 @@ public class PauseOptionsPanel extends GamePanel {
         restartButton.setFontStyle("Arial", Font.BOLD, 20)
                 .setColors(new Color(40, 40, 40), Color.WHITE);
         quitButton.setFontStyle("Arial", Font.BOLD, 20)
-                .setColors(new Color(80, 0, 0), Color.WHITE);
+                .setColors(new Color(40, 40, 40), Color.WHITE);
 
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "escapePressed");
         getActionMap().put("escapePressed", new AbstractAction() {
@@ -51,6 +57,11 @@ public class PauseOptionsPanel extends GamePanel {
         add(Box.createVerticalGlue());
     }
 
+    /**
+     * Resumes the game by returning to the previous game panel.
+     * Also resumes the currently playing background music.
+     * @param frame the main game frame used to access the paused game panel
+     */
     private void resumeGame(GameFrame frame){
         if (frame.getContentPane().getComponent(0) instanceof PausePanel pausePanel) {
             frame.setScreen(pausePanel.getGamePanel());
@@ -59,16 +70,31 @@ public class PauseOptionsPanel extends GamePanel {
         SoundManager.get().resumeMusic();
     }
 
+    /**
+     * Restarts the game by creating a new MainGamePanel instance.
+     * Also restarts the background music from the beginning.
+     * @param frame the main game frame used to load the new game panel
+     */
     private void restartGame(GameFrame frame){
         frame.setScreen(new MainGamePanel(frame));
         SoundManager.get().restartMusic();
     }
 
+    /**
+     * Quits the current game session and returns the user to the instructions screen.
+     * Also stops all background music.
+     * @param frame the main game frame used to switch back to the instructions panel
+     */
     private void quitGame(GameFrame frame){
         frame.setScreen(new InstructionsPanel(frame));
         SoundManager.get().stopMusic();
     }
 
+    /**
+     * Wraps a button in a transparent panel and centers it horizontally.
+     * @param button the button to be centered in the panel
+     * @return a JPanel that centers the given button
+     */
     private JPanel centerButton(JButton button) {
         JPanel panel = new JPanel();
         panel.setOpaque(false);

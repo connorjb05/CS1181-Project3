@@ -7,6 +7,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class InstructionSubPanel extends GamePanel {
+
+    /**
+     * Creates a sub-panel that displays the game's control instructions.
+     * @param frame current game frame
+     */
     public InstructionSubPanel(GameFrame frame) {
         super(frame);
 
@@ -25,6 +30,13 @@ public class InstructionSubPanel extends GamePanel {
         add(glide);
     }
 
+    /**
+     * Creates and styles an instruction label with the given text and color.
+     * Labels are centered, bold, and sized for readability on the instructions screen.
+     * @param text  the instruction text to display
+     * @param color the color used for the text
+     * @return a fully styled JLabel containing the instruction
+     */
     private JLabel createInstructionLabel(String text, Color color){
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.BOLD, 20));

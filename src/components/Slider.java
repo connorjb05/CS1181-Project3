@@ -5,7 +5,7 @@ import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 
 /*
-Credit to ChatGPT
+Credit to ChatGPT for this entire class
  */
 public class Slider extends BasicSliderUI {
 

@@ -12,8 +12,8 @@ public class Button extends JButton implements ActionListener {
     private Runnable clickEvent = null;
 
     /**
-     *
-     * @param text
+     * Creates a button with the specified text and default styling
+     * @param text the text displayed on the button
      */
     public Button(String text){
         super(text);
@@ -21,9 +21,9 @@ public class Button extends JButton implements ActionListener {
     }
 
     /**
-     *
-     * @param text
-     * @param clickEvent
+     * Creates a button with the specified text and a click event callback
+     * @param text the text displayed on the button
+     * @param clickEvent the action to execute when the button is clicked
      */
     public Button(String text, Runnable clickEvent){
         super(text);
@@ -32,7 +32,10 @@ public class Button extends JButton implements ActionListener {
     }
 
     /**
+     * Initializes the buttons default appearance, behavior, mouse hover effects,
+     * and assigns the ActionListener used to trigger click events.
      *
+     * Credit to ChatGPT for assistance in the mouse hovering effect
      */
     private void initialize(){
         setFocusPainted(false);
@@ -68,13 +71,9 @@ public class Button extends JButton implements ActionListener {
         });
     }
 
-    public void setAction(Runnable clickEvent){
-        this.clickEvent = clickEvent;
-    }
-
     /**
-     *
-     * @param e the event to be processed
+     * Sets the action executed when the button is clicked.
+     * @param e the Runnable/action to run on click
      */
     @Override
     public void actionPerformed(ActionEvent e){
@@ -82,10 +81,10 @@ public class Button extends JButton implements ActionListener {
     }
 
     /**
-     *
-     * @param background
-     * @param foreground
-     * @return
+     * Sets the background and foreground colors of the button.
+     * @param background the background color to apply
+     * @param foreground the text color to apply
+     * @return this button instance
      */
     public Button setColors(Color background, Color foreground){
         setBackground(background);
@@ -94,21 +93,23 @@ public class Button extends JButton implements ActionListener {
     }
 
     /**
-     *
-     * @param name
-     * @param style
-     * @param size
-     * @return
+     * Sets the font style, weight, and size for the button's text.
+     * @param name  the name of the font family
+     * @param style the font style (Font.BOLD)
+     * @param size  the font size in points
+     * @return this button instance
      */
     public Button setFontStyle(String name, int style, int size){
         setFont(new Font(name, style, size));
         return this;
     }
 
-    // Credit to CHatGPT for this paint method
+    public void setAction(Runnable clickEvent){
+        this.clickEvent = clickEvent;
+    }
 
     /**
-     *
+     * Credit to ChatGPT for this paint method
      * @param graphics the <code>Graphics</code> object to protect
      */
     @Override

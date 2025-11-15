@@ -12,6 +12,14 @@ public class PausePanel extends GamePanel {
     private final MainGamePanel gamePanel;
     private final BufferedImage background;
 
+    /**
+     * Creates the main pause screen panel, which displays a blurred snapshot
+     * of the gameplay along with the pause options menu. This panel acts as
+     * the container for the pause interface when the game is paused.
+     * @param frame the main game frame used for screen switching
+     * @param gamePanel the active game panel that was paused
+     * @param background the captured background image of the game used for the blur effect
+     */
     public PausePanel(GameFrame frame, MainGamePanel gamePanel, BufferedImage background) {
         super(frame);
 
@@ -26,6 +34,12 @@ public class PausePanel extends GamePanel {
         add(pauseOptionsPanel);
     }
 
+    /**
+     * Paints the pause screen background. This includes drawing the blurred
+     * snapshot of the paused game and applying a semi-transparent dark overlay
+     * to enhance menu visibility.
+     * @param g the <code>Graphics</code> object to protect
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -40,7 +54,7 @@ public class PausePanel extends GamePanel {
     }
 
     /*
-    Credit to ChatGPT
+    Credit to ChatGPT for this attempt of blurring the background image
      */
     private BufferedImage blurImage(BufferedImage img, int radius) {
         if (radius < 1) return img;
